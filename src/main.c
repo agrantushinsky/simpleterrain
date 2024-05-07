@@ -3,7 +3,6 @@
 
 int main(void)
 {
-    a();
     // if we fail to setup, return failure.
     if(!game_init())
         return -1;

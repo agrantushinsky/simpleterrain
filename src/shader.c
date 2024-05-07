@@ -61,9 +61,10 @@ void shader_init(const char* name, unsigned int id)
     GLuint vertex_shader;
     GLuint fragment_shader;
 
+    const char* shader_path = "res/%s.%s";
     char vertex_path[80], fragment_path[80];
-    sprintf(vertex_path, "shaders/%s.vert", name);
-    sprintf(fragment_path, "shaders/%s.frag", name);
+    sprintf(vertex_path, shader_path, name, "vert");
+    sprintf(fragment_path,shader_path, name, "frag");
 
     char* vertex_shader_source = read_file(vertex_path);
     char* fragment_shader_source = read_file(fragment_path);
