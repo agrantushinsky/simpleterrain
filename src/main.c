@@ -1,5 +1,6 @@
 #include "game.h"
 #include "shader.h"
+#include <Windows.h>
 
 int main(void)
 {

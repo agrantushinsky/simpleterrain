@@ -37,3 +37,8 @@ add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PRJ_LIBRARIES} PUBLIC ${OPENGL_LIBRARY})
 
+if(MSVC)
+	set_target_properties(${PROJECT_NAME} PROPERTIES 
+		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+endif()
+

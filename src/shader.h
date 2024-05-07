@@ -3,7 +3,7 @@
 
 #include "shared.h" 
 
-#define MAX_SHADERS 8
+#define MAX_SHADERS 16
 
 extern GLuint shader_programs[MAX_SHADERS];
 
@@ -20,7 +20,7 @@ char* read_file(const char* path);
 void shaders_init();
 
 // this function will setup a given shader
-void shader_init(const char* name, unsigned int id);
+void shader_init(const char* file_name, unsigned int id, GLenum shader_type);
 
 #endif
 

@@ -54,32 +54,25 @@ char* read_file(const char* path)
     return text;
 }
 
-void shader_init(const char* name, unsigned int id)
+void shader_init(const char* file_name, unsigned int id, GLenum shader_type)
 {
     shader_programs[id] = glCreateProgram();
 
-    GLuint vertex_shader;
-    GLuint fragment_shader;
+    GLuint shader;
 
-    const char* shader_path = "res/%s.%s";
-    char vertex_path[80], fragment_path[80];
-    sprintf(vertex_path, shader_path, name, "vert");
-    sprintf(fragment_path,shader_path, name, "frag");
+    const char* shader_path_fmt = "../res/%s";
+    char shader_path[_MAX_PATH];
+    sprintf(&shader_path, shader_path_fmt, file_name);
 
-    char* vertex_shader_source = read_file(vertex_path);
-    char* fragment_shader_source = read_file(fragment_path);
+    char* shader_source = read_file(shader_path);
 
-    shader_create(&vertex_shader, GL_VERTEX_SHADER, vertex_shader_source);
-    shader_create(&fragment_shader, GL_FRAGMENT_SHADER, fragment_shader_source);
+    shader_create(&shader, shader_type, shader_source);
 
-    shader_compile(&vertex_shader);
-    shader_compile(&fragment_shader);
+    shader_compile(&shader);
 
-    free(vertex_shader_source);
-    free(fragment_shader_source);
+    free(shader_source);
 
-    glAttachShader(shader_programs[id], vertex_shader);
-    glAttachShader(shader_programs[id], fragment_shader);
+    glAttachShader(shader_programs[id], shader);
 
     glLinkProgram(shader_programs[id]);
 
@@ -90,18 +83,18 @@ void shader_init(const char* name, unsigned int id)
     {
         GLchar log[1024];
         glGetProgramInfoLog(shader_programs[id], sizeof(log), NULL, log);
-        printf("Error linking shader %s: '%s'\n", name, log);
+        printf("Error linking shader %s: '%s'\n", file_name, log);
     }
 
     // TODO: check if this is neccessary
     // specifically in non-debug builds
     glValidateProgram(shader_programs[id]);
 
-    printf("Setup %s\n", name);
+    printf("Setup shader: %s\n", file_name);
 }
 
 void shaders_init()
 {
-    shader_init("shader", 0);
+    shader_init("shader.vert", 0, GL_VERTEX_SHADER);
 }
 
