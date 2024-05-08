@@ -47,7 +47,7 @@ char* read_file(const char* path)
     fseek(f, 0, SEEK_END);
     len = ftell(f);
     fseek(f, 0, SEEK_SET);
-    text = calloc(len, sizeof(char) + 1); // not sure if this + 1 is neccessary
+    text = calloc(len + 1, sizeof(char)); // not sure if this + 1 is neccessary
     fread(text, sizeof(char), len, f);
     fclose(f);
 
@@ -95,6 +95,7 @@ void shader_init(const char* file_name, unsigned int id, GLenum shader_type)
 
 void shaders_init()
 {
-    shader_init("shader.vert", 0, GL_VERTEX_SHADER);
+    shader_init("shader.frag", 0, GL_FRAGMENT_SHADER);
+    shader_init("shader.vert", 1, GL_VERTEX_SHADER);
 }
 
