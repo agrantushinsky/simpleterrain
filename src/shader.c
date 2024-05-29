@@ -54,10 +54,8 @@ char* read_file(const char* path)
     return text;
 }
 
-void shader_init(const char* file_name, unsigned int id, GLenum shader_type)
+void shader_link_to_id(const char* file_name, unsigned int id, GLenum shader_type)
 {
-    shader_programs[id] = glCreateProgram();
-
     GLuint shader;
 
     const char* shader_path_fmt = "../res/%s";
@@ -90,12 +88,13 @@ void shader_init(const char* file_name, unsigned int id, GLenum shader_type)
     // specifically in non-debug builds
     glValidateProgram(shader_programs[id]);
 
-    printf("Setup shader: %s\n", file_name);
+    printf("Linked shader: '%s' to id %i\n", file_name, id);
 }
 
 void shaders_init()
 {
-    shader_init("shader.frag", 0, GL_FRAGMENT_SHADER);
-    shader_init("shader.vert", 1, GL_VERTEX_SHADER);
+    shader_programs[0] = glCreateProgram();
+    shader_link_to_id("shader.frag", 0, GL_FRAGMENT_SHADER);
+    shader_link_to_id("shader.vert", 0, GL_VERTEX_SHADER);
 }
 

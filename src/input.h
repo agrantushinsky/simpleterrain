@@ -5,7 +5,7 @@
 
 // TODO: This number is completely random :)
 #define MAX_KEYS 512
-extern bool key_states[MAX_KEYS];
+extern bool held_keys[MAX_KEYS];
 
 void keyboard_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 

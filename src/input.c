@@ -1,4 +1,5 @@
 #include "input.h"
+#include "game.h"
 
 bool held_keys[MAX_KEYS];
 
@@ -15,6 +16,18 @@ void keyboard_callback(GLFWwindow* window, int key, int scancode, int action, in
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+    static double last_xpos = 0.0;
+    static double last_ypos = 0.0;
 
+    double dx = xpos - last_xpos;
+    double dy = ypos - last_ypos;
+
+    last_xpos = xpos;
+    last_ypos = ypos;
+
+    game->camera.yaw += dx * 0.05f;
+    game->camera.pitch -= dy * 0.05f;
+    printf("yaw: %f, pitch: %f\n", game->camera.yaw, game->camera.pitch);
+    camera_update_view(&game->camera);
 }
 

@@ -49,6 +49,7 @@ bool game_init()
     glfwSetInputMode(game->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     shaders_init();
+    camera_init(&game->camera, game->vertical_fov);
     
     // surely everything is working, right?
     return true;

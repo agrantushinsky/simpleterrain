@@ -9,6 +9,7 @@ file(GLOB_RECURSE SOURCE_FILES
     ${CMAKE_SOURCE_DIR}/src/game.c
     ${CMAKE_SOURCE_DIR}/src/input.c
     ${CMAKE_SOURCE_DIR}/src/shader.c
+    ${CMAKE_SOURCE_DIR}/src/camera.c
     ${CMAKE_SOURCE_DIR}/src/main.c
 )
 	
@@ -17,6 +18,7 @@ file(GLOB_RECURSE HEADER_FILES
     ${CMAKE_SOURCE_DIR}/src/game.h
     ${CMAKE_SOURCE_DIR}/src/input.h
     ${CMAKE_SOURCE_DIR}/src/shader.h
+    ${CMAKE_SOURCE_DIR}/src/camera.h
     ${CMAKE_SOURCE_DIR}/src/shared.h
 )
 

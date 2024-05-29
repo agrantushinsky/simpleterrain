@@ -20,7 +20,7 @@ char* read_file(const char* path);
 void shaders_init();
 
 // this function will setup a given shader
-void shader_init(const char* file_name, unsigned int id, GLenum shader_type);
+void shader_link_to_id(const char* file_name, unsigned int id, GLenum shader_type);
 
 #endif
 
