@@ -26,9 +26,13 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     last_ypos = ypos;
 
     game->camera.yaw += dx * 0.05f;
-    game->camera.pitch -= dy * 0.05f;
-    //printf("yaw: %f, pitch: %f\n", game->camera.yaw, game->camera.pitch);
-    // TODO: Clamp yaw & pitch
+    if(game->camera.yaw > 360 || game->camera.yaw < -360) 
+    {
+        game->camera.yaw = 0;
+    }
+
+    game->camera.pitch = glm_min(glm_max(game->camera.pitch - dy * 0.05f, -89.99f), 89.99f);
+
     camera_update_view(&game->camera);
 }
 
