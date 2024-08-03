@@ -1,12 +1,12 @@
+#include "chunk.h"
 #include "game.h"
 #include "shader.h"
 #include "input.h"
 
 void handle_input() 
 {
-    const static float speed = 0.01f;
+    const static float speed = 0.0005f;
     float yaw = game->camera.yaw;
-    float pitch = game->camera.pitch;
     if (held_keys[GLFW_KEY_W]) {
         game->camera.position[0] += speed * cosf(glm_rad(yaw));
         game->camera.position[2] += speed * sinf(glm_rad(yaw));
@@ -39,42 +39,6 @@ int main(void)
     if(!game_init())
         return -1;
 
-    vec3 vertices[] = {
-		{-0.5f, -0.5f, 0.5f},
-		{0.5f, -0.5f, 0.5f},
-		{0.5f, 0.5f, 0.5f},
-		{-0.5f, 0.5f, 0.5f},
-		{-0.5f, -0.5f, -0.5f},
-		{0.5f, -0.5f, -0.5f},
-		{0.5f, 0.5f, -0.5f},
-		{-0.5f, 0.5f, -0.5f}
-    };
-
-    unsigned int indices[] = {
-		0, 1, 2, 2, 3, 0,
-		1, 5, 6, 6, 2, 1,
-		7, 6, 5, 5, 4, 7,
-		4, 0, 3, 3, 7, 4,
-		4, 5, 1, 1, 0, 4,
-		3, 2, 6, 6, 7, 3
-    };
-
-    GLuint vertex_buffer;
-    GLuint index_buffer;
-
-    glGenBuffers(1, &vertex_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-
-    glGenBuffers(1, &index_buffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(0);
-
     glUseProgram(shader_programs[0]);
 
     GLuint matrix_location = glGetUniformLocation(shader_programs[0], "matrix");
@@ -87,20 +51,25 @@ int main(void)
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    Chunk* chunk = chunk_generate();
+
+    chunk_generate_mesh(chunk);
+
     while (!glfwWindowShouldClose(game->window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		mat4 rotation = GLM_MAT4_IDENTITY_INIT;
-		//glm_rotate(rotation, sinf(glfwGetTime()), (vec3) { 1.0f, 1.0f, 1.0f });
 
 		mat4 final_matrix;
 		glm_mat4_mulN((mat4* []){&game->camera.perspective, &game->camera.view, &translation, &rotation},
 			4, final_matrix);
 
-        glUniformMatrix4fv(matrix_location, 1, GL_FALSE, final_matrix);
+        glUniformMatrix4fv(matrix_location, 1, GL_FALSE, (float*)final_matrix);
 
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        chunk_render(chunk);
 
         glfwSwapBuffers(game->window);
         glfwPollEvents();
@@ -110,3 +79,4 @@ int main(void)
     glfwTerminate();
     return 0;
 }
+ 

@@ -2,5 +2,9 @@ build/
 out/
 bin/
 .vs/
+.cache/
 
 CMakeSettings.json
+
+vcpkg-manifest-install.log
+vcpkg_installed/

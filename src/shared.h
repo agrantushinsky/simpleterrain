@@ -15,5 +15,5 @@
 #include <GLFW/glfw3.h>
 #include <cglm/call.h>
 
-#endif SHARED_H
+#endif
 

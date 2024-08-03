@@ -59,8 +59,8 @@ void shader_link_to_id(const char* file_name, unsigned int id, GLenum shader_typ
     GLuint shader;
 
     const char* shader_path_fmt = "../res/%s";
-    char shader_path[_MAX_PATH];
-    sprintf(&shader_path, shader_path_fmt, file_name);
+    char shader_path[128]; // TODO: huh
+    sprintf((char*)&shader_path, shader_path_fmt, file_name);
 
     char* shader_source = read_file(shader_path);
 

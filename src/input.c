@@ -27,7 +27,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
     game->camera.yaw += dx * 0.05f;
     game->camera.pitch -= dy * 0.05f;
-    printf("yaw: %f, pitch: %f\n", game->camera.yaw, game->camera.pitch);
+    //printf("yaw: %f, pitch: %f\n", game->camera.yaw, game->camera.pitch);
+    // TODO: Clamp yaw & pitch
     camera_update_view(&game->camera);
 }
 

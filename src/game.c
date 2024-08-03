@@ -6,6 +6,11 @@
 
 struct Game* game;
 
+void APIENTRY debug_callback(GLenum source, GLenum type, GLenum id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam) 
+{
+    fprintf(stderr, "GL DEBUG:\n%s\n", message);
+}
+
 bool game_init()
 {
     if(!glfwInit())
@@ -47,6 +52,13 @@ bool game_init()
 
     // disable the cursor
     glfwSetInputMode(game->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // disables vsync(??)
+    glfwSwapInterval(0);
+
+    // log errors
+    glEnable(GL_DEBUG_OUTPUT);
+    glad_glDebugMessageCallback((void*)debug_callback, NULL);
 
     shaders_init();
     camera_init(&game->camera, game->vertical_fov);
