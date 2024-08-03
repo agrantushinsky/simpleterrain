@@ -75,33 +75,19 @@ void chunk_generate_mesh(Chunk* chunk)
                     break;
                 }
 
-                //float* buffer = &chunk->buffer[chunk->buffer_usage * 36];
+                float* buffer = &chunk->buffer[chunk->buffer_usage * 36 * 3];
                 
                 // copy vertex data into the buffer
                 for(int i = 0; i < 36; i++)
                 {
-//                    *(buffer++) = vertices[i][0] + x;
-//                    *(buffer++) = vertices[i][1] + y;
-//                    *(buffer++) = vertices[i][2] + z;
-                    chunk->buffer[chunk->buffer_usage * 36 + (i * 3)] = vertices[i][0] / 2 + x;
-                    chunk->buffer[chunk->buffer_usage * 36 + (i * 3) + 1] = vertices[i][1] / 2 + y;
-                    chunk->buffer[chunk->buffer_usage * 36 + (i * 3) + 2] = vertices[i][2] / 2 + z;
-
-                    printf("block for %i %i %i: { %f %f %f } -> { %f %f %f }\n", 
-                           x, y, z, 
-                           vertices[i][0],
-                           vertices[i][1],
-                           vertices[i][2],
-                           chunk->buffer[chunk->buffer_usage * 36 + (i * 3)],
-                           chunk->buffer[chunk->buffer_usage * 36 + (i * 3) + 1],
-                           chunk->buffer[chunk->buffer_usage * 36 + (i * 3) + 2]);
+                    *(buffer++) = vertices[i][0] / 2 + x;
+                    *(buffer++) = vertices[i][1] / 2 + y;
+                    *(buffer++) = vertices[i][2] / 2 + z;
                 }
                 chunk->buffer_usage++;
 			}
 		}
 	}
-
-    printf("usage: %i\n", chunk->buffer_usage);
 
     GLuint vertex_buffer;
     glGenBuffers(1, &vertex_buffer);
