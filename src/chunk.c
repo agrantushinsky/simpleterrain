@@ -55,7 +55,7 @@ void chunk_generate_mesh(Chunk* chunk)
         { 1.f, 1.f, 1.f }, { -1.f, 1.f, 1.f }, { 1.f, -1.f, 1.f },
     };
 
-    chunk->buffer_size = 2;
+    chunk->buffer_size = 128;
     chunk->buffer_usage = 0;
     chunk->buffer = malloc(sizeof(vertices) * chunk->buffer_size);
 
@@ -71,8 +71,8 @@ void chunk_generate_mesh(Chunk* chunk)
                 if(block.type == Air) continue;
                 if(chunk->buffer_usage >= chunk->buffer_size)
                 {
-                    // TODO;
-                    break;
+                    chunk->buffer_size *= 2;
+                    chunk->buffer = realloc(chunk->buffer, sizeof(vertices) * chunk->buffer_size);
                 }
 
                 float* buffer = &chunk->buffer[chunk->buffer_usage * 36 * 3];
