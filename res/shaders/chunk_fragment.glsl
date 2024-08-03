@@ -1,11 +1,14 @@
 #version 330
 
-out vec4 FragColor;
+layout(location = 0) out vec4 outColour;
 
-in vec4 color;
+in vec2 TexCoord;
+
+uniform sampler2D sTexture;
 
 void main()
 {
-    FragColor = color;
+    outColour = texture(sTexture, TexCoord);
+    //outColour = vec4(TexCoord.x, TexCoord.y, 1.0f, 1.0f);
 }
 

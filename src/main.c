@@ -2,6 +2,7 @@
 #include "game.h"
 #include "shader.h"
 #include "input.h"
+#include "shared.h"
 
 void handle_input() 
 {

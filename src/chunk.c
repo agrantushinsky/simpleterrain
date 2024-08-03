@@ -3,6 +3,7 @@
 #include "shared.h"
 #include <GL/glext.h>
 #include <stdlib.h>
+#include "texture.h"
 
 Chunk* chunk_generate()
 {
@@ -31,40 +32,42 @@ void chunk_generate_mesh(Chunk* chunk)
 {
     static const vec3 vertices[] = {
         // -x
-        { -1.f, -1.f, -1.f }, { -1.f, 1.f, -1.f }, { -1.f, -1.f, 1.f },
-        { -1.f, 1.f, 1.f }, { -1.f, 1.f, -1.f }, { -1.f, -1.f, 1.f },
+        { -1.f, -1.f, 1.f }, { -1.f, 1.f, 1.f }, { -1.f, -1.f, -1.f },
+        { -1.f, 1.f, -1.f }, { -1.f, 1.f, 1.f }, { -1.f, -1.f, -1.f },
 
         // +x
         { 1.f, -1.f, -1.f }, { 1.f, 1.f, -1.f }, { 1.f, -1.f, 1.f },
         { 1.f, 1.f, 1.f }, { 1.f, 1.f, -1.f }, { 1.f, -1.f, 1.f },
 
         // -y
-        { -1.f, -1.f, -1.f }, { -1.f, -1.f, 1.f }, { 1.f, -1.f, 1.f },
-        { -1.f, -1.f, -1.f }, { 1.f, -1.f, 1.f }, { 1.f, -1.f, -1.f },
+        { 1.f, -1.f, -1.f }, { 1.f, -1.f, 1.f },{ -1.f, -1.f, -1.f },
+        { -1.f, -1.f, 1.f }, { -1.f, -1.f, -1.f }, { 1.f, -1.f, 1.f },
 
         // +y
-        { -1.f, 1.f, -1.f }, { -1.f, 1.f, 1.f }, { 1.f, 1.f, 1.f },
-        { -1.f, 1.f, -1.f }, { 1.f, 1.f, 1.f }, { 1.f, 1.f, -1.f },
+        { 1.f, 1.f, -1.f }, { 1.f, 1.f, 1.f },{ -1.f, 1.f, -1.f },
+        { -1.f, 1.f, 1.f }, { -1.f, 1.f, -1.f }, { 1.f, 1.f, 1.f },
 
         // -z
         { -1.f, -1.f, -1.f }, { -1.f, 1.f, -1.f }, { 1.f, -1.f, -1.f },
         { 1.f, 1.f, -1.f }, { -1.f, 1.f, -1.f }, { 1.f, -1.f, -1.f },
 
         // +z
-        { -1.f, -1.f, 1.f }, { -1.f, 1.f, 1.f }, { 1.f, -1.f, 1.f },
-        { 1.f, 1.f, 1.f }, { -1.f, 1.f, 1.f }, { 1.f, -1.f, 1.f },
+        { 1.f, -1.f, 1.f }, { 1.f, 1.f, 1.f }, { -1.f, -1.f, 1.f },
+        { -1.f, 1.f, 1.f }, { 1.f, 1.f, 1.f }, { -1.f, -1.f, 1.f },
     };
 
     static const vec2 tex_coords[] = {
         { 1.f, 1.f }, // top right
+        { 0.f, 1.f }, // top left
         { 1.f, 0.f }, // bottom right
         { 0.f, 0.f }, // bottom left
+        { 1.f, 0.f }, // bottom right
         { 0.f, 1.f }, // top left
     };
 
     const uint cube_size = sizeof(vertices) + (sizeof(vec2) * 36);
 
-    chunk->buffer_size = 256;
+    chunk->buffer_size = 1;//256;
     chunk->buffer_usage = 0;
     chunk->buffer = malloc(cube_size * chunk->buffer_size);
 
@@ -80,6 +83,7 @@ void chunk_generate_mesh(Chunk* chunk)
                 if(block.type == Air) continue;
                 if(chunk->buffer_usage >= chunk->buffer_size)
                 {
+                    break;
                     chunk->buffer_size *= 2;
                     chunk->buffer = realloc(chunk->buffer, cube_size * chunk->buffer_size);
                 }
@@ -90,14 +94,29 @@ void chunk_generate_mesh(Chunk* chunk)
                 // copy vertex data into the buffer
                 for(int i = 0; i < 36; i++)
                 {
+                    // vertex positions
                     *(buffer++) = vertices[i][0] / 2 + x;
                     *(buffer++) = vertices[i][1] / 2 + y;
                     *(buffer++) = vertices[i][2] / 2 + z;
+
+                    // texture coordinates
+                    *(buffer++) = tex_coords[i % 6][0];
+                    *(buffer++) = tex_coords[i % 6][1];                
                 }
                 chunk->buffer_usage++;
 			}
 		}
 	}
+
+    for(int i = 0; i < 36; i++)
+    {
+        printf("{ %f, %f, %f }, { %f, %f }\n",
+               chunk->buffer[i * 5],
+               chunk->buffer[i * 5 + 1],
+               chunk->buffer[i * 5 + 2],
+               chunk->buffer[i * 5 + 3],
+               chunk->buffer[i * 5 + 4]);
+    }
 
     GLuint vertex_buffer;
     glGenBuffers(1, &vertex_buffer);
@@ -109,8 +128,15 @@ void chunk_generate_mesh(Chunk* chunk)
     glEnableVertexAttribArray(0);
 
     // texture coordinates
-    // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    // glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vec3) + sizeof(vec2), (void*)sizeof(vec3));
+    glEnableVertexAttribArray(1);
+
+    GLuint texture = texture_create("../res/images/blocks.png", GL_RGBA, GL_RGB);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glUniform1i(glGetUniformLocation(texture, "sTexture"), 0);   
 }
 
 void chunk_render(Chunk* chunk)

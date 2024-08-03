@@ -3,7 +3,7 @@
 
 #include "shared.h"
 
-GLuint texture_create(const char* texture_name);
+GLuint texture_create(const char* texture_name, GLint internal_format, GLenum format);
 
 #endif
 
