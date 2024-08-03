@@ -55,9 +55,18 @@ void chunk_generate_mesh(Chunk* chunk)
         { 1.f, 1.f, 1.f }, { -1.f, 1.f, 1.f }, { 1.f, -1.f, 1.f },
     };
 
-    chunk->buffer_size = 128;
+    static const vec2 tex_coords[] = {
+        { 1.f, 1.f }, // top right
+        { 1.f, 0.f }, // bottom right
+        { 0.f, 0.f }, // bottom left
+        { 0.f, 1.f }, // top left
+    };
+
+    const uint cube_size = sizeof(vertices) + (sizeof(vec2) * 36);
+
+    chunk->buffer_size = 256;
     chunk->buffer_usage = 0;
-    chunk->buffer = malloc(sizeof(vertices) * chunk->buffer_size);
+    chunk->buffer = malloc(cube_size * chunk->buffer_size);
 
     // This might be a little slow :) 
 	for (int x = 0; x < CHUNK_SIZE; x++)
@@ -72,11 +81,12 @@ void chunk_generate_mesh(Chunk* chunk)
                 if(chunk->buffer_usage >= chunk->buffer_size)
                 {
                     chunk->buffer_size *= 2;
-                    chunk->buffer = realloc(chunk->buffer, sizeof(vertices) * chunk->buffer_size);
+                    chunk->buffer = realloc(chunk->buffer, cube_size * chunk->buffer_size);
                 }
 
-                float* buffer = &chunk->buffer[chunk->buffer_usage * 36 * 3];
+                float* buffer = &chunk->buffer[chunk->buffer_usage * 36 * (3 + 2)];
                 
+                // TODO: Optimize by only copying the block face that is exposed to air
                 // copy vertex data into the buffer
                 for(int i = 0; i < 36; i++)
                 {
@@ -92,10 +102,15 @@ void chunk_generate_mesh(Chunk* chunk)
     GLuint vertex_buffer;
     glGenBuffers(1, &vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) * chunk->buffer_usage, chunk->buffer, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, cube_size * chunk->buffer_usage, chunk->buffer, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    // vertex positions
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) + sizeof(vec2), 0);
     glEnableVertexAttribArray(0);
+
+    // texture coordinates
+    // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    // glEnableVertexAttribArray(1);
 }
 
 void chunk_render(Chunk* chunk)

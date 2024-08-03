@@ -6,6 +6,7 @@ project(
 
 # Source files
 file(GLOB_RECURSE SOURCE_FILES 
+    ${CMAKE_SOURCE_DIR}/src/texture.c
     ${CMAKE_SOURCE_DIR}/src/world.c
     ${CMAKE_SOURCE_DIR}/src/chunk.c
     ${CMAKE_SOURCE_DIR}/src/block.c
@@ -18,6 +19,7 @@ file(GLOB_RECURSE SOURCE_FILES
 	
 # Header files
 file(GLOB_RECURSE HEADER_FILES 
+    ${CMAKE_SOURCE_DIR}/src/texture.h
     ${CMAKE_SOURCE_DIR}/src/world.h
     ${CMAKE_SOURCE_DIR}/src/chunk.h
     ${CMAKE_SOURCE_DIR}/src/block.h
@@ -25,13 +27,15 @@ file(GLOB_RECURSE HEADER_FILES
     ${CMAKE_SOURCE_DIR}/src/input.h
     ${CMAKE_SOURCE_DIR}/src/shader.h
     ${CMAKE_SOURCE_DIR}/src/camera.h
-    ${CMAKE_SOURCE_DIR}/src/stb_ds.h
     ${CMAKE_SOURCE_DIR}/src/shared.h
+
+    ${CMAKE_SOURCE_DIR}/lib/stb/stb_image.h
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY 
     ${CMAKE_BINARY_DIR}/bin)
 
+include_directories(${CMAKE_SOURCE_DIR}/lib)
 
 set(PRJ_LIBRARIES
     glad::glad

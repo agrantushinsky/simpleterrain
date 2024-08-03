@@ -58,7 +58,7 @@ void shader_link_to_id(const char* file_name, unsigned int id, GLenum shader_typ
 {
     GLuint shader;
 
-    const char* shader_path_fmt = "../res/%s";
+    const char* shader_path_fmt = "../res/shaders/%s";
     char shader_path[128]; // TODO: huh
     sprintf((char*)&shader_path, shader_path_fmt, file_name);
 
@@ -94,7 +94,7 @@ void shader_link_to_id(const char* file_name, unsigned int id, GLenum shader_typ
 void shaders_init()
 {
     shader_programs[0] = glCreateProgram();
-    shader_link_to_id("shader.frag", 0, GL_FRAGMENT_SHADER);
-    shader_link_to_id("shader.vert", 0, GL_VERTEX_SHADER);
+    shader_link_to_id("chunk_fragment.glsl", 0, GL_FRAGMENT_SHADER);
+    shader_link_to_id("chunk_vertex.glsl", 0, GL_VERTEX_SHADER);
 }
 

@@ -30,6 +30,17 @@ void handle_input()
         game->camera.position[1] -= speed;
     }
 
+    static bool toggle_wireframe = true;
+    if(held_keys[GLFW_KEY_V]) {
+        held_keys[GLFW_KEY_V] = false; // :)
+        if(toggle_wireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        } else {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+        toggle_wireframe = !toggle_wireframe;
+    }
+
     camera_update_view(&game->camera);
 }
 
@@ -51,7 +62,6 @@ int main(void)
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     Chunk* chunk = chunk_generate();
 
