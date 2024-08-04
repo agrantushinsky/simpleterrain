@@ -6,8 +6,15 @@
 
 struct {
 	Chunk* chunks;
+    int chunks_max;
+
+    int loaded_chunks;
 } typedef World;
 
-World* world_init();
+void world_init(World* world);
+
+void world_update(World* world);
+
+void world_render(World* world);
 
 #endif

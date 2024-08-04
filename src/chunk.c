@@ -5,12 +5,8 @@
 #include <stdlib.h>
 #include "texture.h"
 
-Chunk* chunk_generate()
+void chunk_generate(Chunk* chunk)
 {
-    // Allocate 1 chunk, initialized to 0
-    // which conveniently sets the block type to 0 (air).
-    Chunk* chunk = calloc(1, sizeof(Chunk));
-
 	for (int x = 0; x < CHUNK_SIZE; x++)
 	{
 		for (int y = 0; y < CHUNK_SIZE; y++)
@@ -24,8 +20,6 @@ Chunk* chunk_generate()
 			}
 		}
 	}
-
-    return chunk;
 }
 
 void chunk_generate_mesh(Chunk* chunk)
@@ -122,18 +116,6 @@ void chunk_generate_mesh(Chunk* chunk)
                chunk->buffer[i * 6 + 5]);
     }
 
-    GLuint vertex_buffer;
-    glGenBuffers(1, &vertex_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, cube_size * chunk->buffer_usage, chunk->buffer, GL_STATIC_DRAW);
-
-    // vertex positions
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) + sizeof(vec3), 0);
-    glEnableVertexAttribArray(0);
-
-    // texture coordinates
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) + sizeof(vec3), (void*)sizeof(vec3));
-    glEnableVertexAttribArray(1);
 
     TextureArray texture_array;
     texture_array_create(&texture_array, GL_RGBA, GL_RGB, 16, 4);
@@ -150,6 +132,24 @@ void chunk_generate_mesh(Chunk* chunk)
 
 void chunk_render(Chunk* chunk)
 {
+    const uint cube_size = sizeof(vec3) * 36 + (sizeof(vec3) * 36);
+
+    GLuint vertex_buffer;
+    glGenBuffers(1, &vertex_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glBufferData(GL_ARRAY_BUFFER, cube_size * chunk->buffer_usage, chunk->buffer, GL_STATIC_DRAW);
+
+    // vertex positions
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) + sizeof(vec3), 0);
+    glEnableVertexAttribArray(0);
+
+    // texture coordinates
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) + sizeof(vec3), (void*)sizeof(vec3));
+    glEnableVertexAttribArray(1);
+
     glDrawArrays(GL_TRIANGLES, 0, 36 * chunk->buffer_usage);
+
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
 }
 
