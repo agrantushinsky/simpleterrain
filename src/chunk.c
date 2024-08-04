@@ -59,11 +59,9 @@ void chunk_generate_mesh(Chunk* chunk)
         { 0.f, 1.f }, // top left
     };
 
-    const uint cube_size = sizeof(vertices) + (sizeof(vec3) * 36);
-
-    chunk->buffer_size = 1;//256;
-    chunk->buffer_usage = 0;
-    chunk->buffer = malloc(cube_size * chunk->buffer_size);
+    chunk->buffer_size = 36;
+    chunk->buffer_triangles = 0;
+    chunk->buffer = malloc(TRIANGLE_BYTES * chunk->buffer_size);
 
     // This might be a little slow :) 
 	for (int x = 0; x < CHUNK_SIZE; x++)
@@ -75,14 +73,14 @@ void chunk_generate_mesh(Chunk* chunk)
                 Block block = chunk->blocks[x][y][z];
 
                 if(block.type == Air) continue;
-                if(chunk->buffer_usage >= chunk->buffer_size)
+                if(chunk->buffer_triangles >= chunk->buffer_size)
                 {
-                    break;
+                    //break;
                     chunk->buffer_size *= 2;
-                    chunk->buffer = realloc(chunk->buffer, cube_size * chunk->buffer_size);
+                    chunk->buffer = realloc(chunk->buffer, TRIANGLE_BYTES * chunk->buffer_size);
                 }
 
-                float* buffer = &chunk->buffer[chunk->buffer_usage * 36 * (3 + 3)];
+                float* buffer = &chunk->buffer[chunk->buffer_triangles * TRIANGLE_SIZE];
                 
                 // TODO: Optimize by only copying the block face that is exposed to air
                 // copy vertex data into the buffer
@@ -99,8 +97,9 @@ void chunk_generate_mesh(Chunk* chunk)
 
                     // texture index
                     *(buffer++) = 0.f;
+
+                    chunk->buffer_triangles++;
                 }
-                chunk->buffer_usage++;
 			}
 		}
 	}
@@ -108,15 +107,15 @@ void chunk_generate_mesh(Chunk* chunk)
     for(int i = 0; i < 36; i++)
     {
         printf("{ %f, %f, %f }, { %f, %f, %f }\n",
-               chunk->buffer[i * 6],
-               chunk->buffer[i * 6 + 1],
-               chunk->buffer[i * 6 + 2],
-               chunk->buffer[i * 6 + 3],
-               chunk->buffer[i * 6 + 4],
-               chunk->buffer[i * 6 + 5]);
+               chunk->buffer[i * TRIANGLE_SIZE],
+               chunk->buffer[i * TRIANGLE_SIZE + 1],
+               chunk->buffer[i * TRIANGLE_SIZE + 2],
+               chunk->buffer[i * TRIANGLE_SIZE + 3],
+               chunk->buffer[i * TRIANGLE_SIZE + 4],
+               chunk->buffer[i * TRIANGLE_SIZE + 5]);
     }
 
-
+    // TODO: Move this.
     TextureArray texture_array;
     texture_array_create(&texture_array, GL_RGBA, GL_RGB, 16, 4);
     texture_array_add(&texture_array, "../res/images/stone.png");
@@ -132,24 +131,24 @@ void chunk_generate_mesh(Chunk* chunk)
 
 void chunk_render(Chunk* chunk)
 {
-    const uint cube_size = sizeof(vec3) * 36 + (sizeof(vec3) * 36);
-
     GLuint vertex_buffer;
     glGenBuffers(1, &vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, cube_size * chunk->buffer_usage, chunk->buffer, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, chunk->buffer_triangles * TRIANGLE_BYTES, chunk->buffer, GL_STATIC_DRAW);
 
     // vertex positions
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) + sizeof(vec3), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, TRIANGLE_BYTES, 0);
     glEnableVertexAttribArray(0);
 
-    // texture coordinates
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) + sizeof(vec3), (void*)sizeof(vec3));
+    // texture coordinates (offset by vertex positions)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, TRIANGLE_BYTES, (void*)sizeof(vec3));
     glEnableVertexAttribArray(1);
 
-    glDrawArrays(GL_TRIANGLES, 0, 36 * chunk->buffer_usage);
+    glDrawArrays(GL_TRIANGLES, 0, chunk->buffer_triangles);
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
+
+    glDeleteBuffers(1, &vertex_buffer);
 }
 

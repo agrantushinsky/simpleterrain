@@ -5,13 +5,9 @@
 #include "block.h"
 
 #define CHUNK_SIZE 16
-#define CHUNK_AREA CHUNK_SIZE*CHUNK_SIZE
-#define CHUNK_VOLUME CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE
 
-#define CHUNK_BUFFER_POSITION_SIZE sizeof(vec3)
-#define CHUNK_BUFFER_TEXTURE_SIZE sizeof(vec3)
-#define CHUNK_BUFFER_FACE_SIZE 6
-#define CHUNK_BUFFER_FACE_BYTES 
+#define TRIANGLE_SIZE 6
+#define TRIANGLE_BYTES 2*sizeof(vec3)
 
 struct {
 	ivec3 position;
@@ -19,8 +15,7 @@ struct {
 
     float* buffer;
     uint buffer_size;
-    uint buffer_usage;
-    uint buffer_faces;
+    uint buffer_triangles;
 } typedef Chunk;
 
 void chunk_generate(Chunk* chunk);
