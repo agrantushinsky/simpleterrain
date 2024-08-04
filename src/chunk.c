@@ -32,11 +32,11 @@ void chunk_generate_mesh(Chunk* chunk)
 {
     static const vec3 vertices[] = {
         // -x
-        { -1.f, -1.f, 1.f }, { -1.f, 1.f, 1.f }, { -1.f, -1.f, -1.f },
+        { -1.f, -1.f, 1.f }, { -1.f, -1.f, -1.f }, { -1.f, 1.f, 1.f }, 
         { -1.f, 1.f, -1.f }, { -1.f, 1.f, 1.f }, { -1.f, -1.f, -1.f },
 
         // +x
-        { 1.f, -1.f, -1.f }, { 1.f, 1.f, -1.f }, { 1.f, -1.f, 1.f },
+        { 1.f, -1.f, -1.f }, { 1.f, -1.f, 1.f }, { 1.f, 1.f, -1.f }, 
         { 1.f, 1.f, 1.f }, { 1.f, 1.f, -1.f }, { 1.f, -1.f, 1.f },
 
         // -y
@@ -48,11 +48,11 @@ void chunk_generate_mesh(Chunk* chunk)
         { -1.f, 1.f, 1.f }, { -1.f, 1.f, -1.f }, { 1.f, 1.f, 1.f },
 
         // -z
-        { -1.f, -1.f, -1.f }, { -1.f, 1.f, -1.f }, { 1.f, -1.f, -1.f },
+        { -1.f, -1.f, -1.f }, { 1.f, -1.f, -1.f }, { -1.f, 1.f, -1.f },
         { 1.f, 1.f, -1.f }, { -1.f, 1.f, -1.f }, { 1.f, -1.f, -1.f },
 
         // +z
-        { 1.f, -1.f, 1.f }, { 1.f, 1.f, 1.f }, { -1.f, -1.f, 1.f },
+        { 1.f, -1.f, 1.f }, { -1.f, -1.f, 1.f }, { 1.f, 1.f, 1.f }, 
         { -1.f, 1.f, 1.f }, { 1.f, 1.f, 1.f }, { -1.f, -1.f, 1.f },
     };
 
@@ -65,7 +65,7 @@ void chunk_generate_mesh(Chunk* chunk)
         { 0.f, 1.f }, // top left
     };
 
-    const uint cube_size = sizeof(vertices) + (sizeof(vec2) * 36);
+    const uint cube_size = sizeof(vertices) + (sizeof(vec3) * 36);
 
     chunk->buffer_size = 1;//256;
     chunk->buffer_usage = 0;
@@ -88,7 +88,7 @@ void chunk_generate_mesh(Chunk* chunk)
                     chunk->buffer = realloc(chunk->buffer, cube_size * chunk->buffer_size);
                 }
 
-                float* buffer = &chunk->buffer[chunk->buffer_usage * 36 * (3 + 2)];
+                float* buffer = &chunk->buffer[chunk->buffer_usage * 36 * (3 + 3)];
                 
                 // TODO: Optimize by only copying the block face that is exposed to air
                 // copy vertex data into the buffer
@@ -101,7 +101,10 @@ void chunk_generate_mesh(Chunk* chunk)
 
                     // texture coordinates
                     *(buffer++) = tex_coords[i % 6][0];
-                    *(buffer++) = tex_coords[i % 6][1];                
+                    *(buffer++) = tex_coords[i % 6][1];
+
+                    // texture index
+                    *(buffer++) = 0.f;
                 }
                 chunk->buffer_usage++;
 			}
@@ -110,12 +113,13 @@ void chunk_generate_mesh(Chunk* chunk)
 
     for(int i = 0; i < 36; i++)
     {
-        printf("{ %f, %f, %f }, { %f, %f }\n",
-               chunk->buffer[i * 5],
-               chunk->buffer[i * 5 + 1],
-               chunk->buffer[i * 5 + 2],
-               chunk->buffer[i * 5 + 3],
-               chunk->buffer[i * 5 + 4]);
+        printf("{ %f, %f, %f }, { %f, %f, %f }\n",
+               chunk->buffer[i * 6],
+               chunk->buffer[i * 6 + 1],
+               chunk->buffer[i * 6 + 2],
+               chunk->buffer[i * 6 + 3],
+               chunk->buffer[i * 6 + 4],
+               chunk->buffer[i * 6 + 5]);
     }
 
     GLuint vertex_buffer;
@@ -124,19 +128,24 @@ void chunk_generate_mesh(Chunk* chunk)
     glBufferData(GL_ARRAY_BUFFER, cube_size * chunk->buffer_usage, chunk->buffer, GL_STATIC_DRAW);
 
     // vertex positions
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) + sizeof(vec2), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) + sizeof(vec3), 0);
     glEnableVertexAttribArray(0);
 
     // texture coordinates
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vec3) + sizeof(vec2), (void*)sizeof(vec3));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) + sizeof(vec3), (void*)sizeof(vec3));
     glEnableVertexAttribArray(1);
 
-    GLuint texture = texture_create("../res/images/blocks.png", GL_RGBA, GL_RGB);
+    TextureArray texture_array;
+    texture_array_create(&texture_array, GL_RGBA, GL_RGB, 16, 4);
+    texture_array_add(&texture_array, "../res/images/stone.png");
+    texture_array_add(&texture_array, "../res/images/dirt.png");
+    texture_array_add(&texture_array, "../res/images/grass_side.png");
+    texture_array_add(&texture_array, "../res/images/grass.png");
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array.texture);
 
-    glUniform1i(glGetUniformLocation(texture, "sTexture"), 0);   
+    glUniform1i(glGetUniformLocation(texture_array.texture, "sTexture"), 0);   
 }
 
 void chunk_render(Chunk* chunk)
