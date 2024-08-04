@@ -3,7 +3,6 @@
 #include "shared.h"
 #include <GL/glext.h>
 #include <stdlib.h>
-#include "texture.h"
 
 void chunk_generate(Chunk* chunk)
 {
@@ -126,19 +125,6 @@ void chunk_generate_mesh(Chunk* chunk)
                chunk->buffer[i * TRIANGLE_SIZE + 4],
                chunk->buffer[i * TRIANGLE_SIZE + 5]);
     }
-
-    // TODO: Move this.
-    TextureArray texture_array;
-    texture_array_create(&texture_array, GL_RGBA, GL_RGB, 16, 4);
-    texture_array_add(&texture_array, "../res/images/stone.png");
-    texture_array_add(&texture_array, "../res/images/dirt.png");
-    texture_array_add(&texture_array, "../res/images/grass_side.png");
-    texture_array_add(&texture_array, "../res/images/grass.png");
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array.texture);
-
-    glUniform1i(glGetUniformLocation(texture_array.texture, "sTexture"), 0);   
 }
 
 void chunk_render(Chunk* chunk)

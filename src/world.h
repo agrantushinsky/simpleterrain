@@ -17,4 +17,6 @@ void world_update(World* world);
 
 void world_render(World* world);
 
+void world_generate_chunks(World* world);
+
 #endif

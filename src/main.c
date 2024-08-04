@@ -13,6 +13,7 @@ int main(void)
         game_update();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.11f, 0.54f, 0.76f, 1.0f);
 
         game_render();
 
