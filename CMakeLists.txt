@@ -30,6 +30,7 @@ file(GLOB_RECURSE HEADER_FILES
     ${CMAKE_SOURCE_DIR}/src/shared.h
 
     ${CMAKE_SOURCE_DIR}/lib/stb/stb_image.h
+    ${CMAKE_SOURCE_DIR}/lib/stb/stb_ds.h
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY 
