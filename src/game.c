@@ -3,14 +3,16 @@
 #include "game.h"
 #include "input.h"
 #include "shader.h"
-#include "chunk.h"
 #include "world.h"
 
 struct Game* game;
 
 void APIENTRY debug_callback(GLenum source, GLenum type, GLenum id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam) 
 {
-    fprintf(stderr, "GL DEBUG:\n%s\n", message);
+    if(severity == GL_DEBUG_SEVERITY_NOTIFICATION) {
+        return;
+    }
+    fprintf(stderr, "GL DEBUG L:%i\n%s\n", severity, message);
 }
 
 // TODO: Move this again.
