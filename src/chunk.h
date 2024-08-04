@@ -8,6 +8,7 @@
 
 #define TRIANGLE_SIZE 6
 #define TRIANGLE_BYTES 2*sizeof(vec3)
+#define TRIANGLES_PER_BLOCK 36
 
 struct {
 	ivec3 position;

@@ -13,11 +13,7 @@ void chunk_generate(Chunk* chunk)
 		{
 			for (int z = 0; z < CHUNK_SIZE; z++)
 			{
-                if(y == 0) 
-                {
-                    chunk->blocks[x][y][z].type = Stone;
-                }
-                chunk->blocks[x][y][z].type = Stone;
+                chunk->blocks[x][y][z].type = Grass;
 			}
 		}
 	}
@@ -34,14 +30,6 @@ void chunk_generate_mesh(Chunk* chunk)
         { 1.f, -1.f, -1.f }, { 1.f, -1.f, 1.f }, { 1.f, 1.f, -1.f }, 
         { 1.f, 1.f, 1.f }, { 1.f, 1.f, -1.f }, { 1.f, -1.f, 1.f },
 
-        // -y
-        { 1.f, -1.f, -1.f }, { 1.f, -1.f, 1.f },{ -1.f, -1.f, -1.f },
-        { -1.f, -1.f, 1.f }, { -1.f, -1.f, -1.f }, { 1.f, -1.f, 1.f },
-
-        // +y
-        { 1.f, 1.f, -1.f }, { 1.f, 1.f, 1.f },{ -1.f, 1.f, -1.f },
-        { -1.f, 1.f, 1.f }, { -1.f, 1.f, -1.f }, { 1.f, 1.f, 1.f },
-
         // -z
         { -1.f, -1.f, -1.f }, { 1.f, -1.f, -1.f }, { -1.f, 1.f, -1.f },
         { 1.f, 1.f, -1.f }, { -1.f, 1.f, -1.f }, { 1.f, -1.f, -1.f },
@@ -49,6 +37,14 @@ void chunk_generate_mesh(Chunk* chunk)
         // +z
         { 1.f, -1.f, 1.f }, { -1.f, -1.f, 1.f }, { 1.f, 1.f, 1.f }, 
         { -1.f, 1.f, 1.f }, { 1.f, 1.f, 1.f }, { -1.f, -1.f, 1.f },
+
+        // -y
+        { 1.f, -1.f, -1.f }, { 1.f, -1.f, 1.f },{ -1.f, -1.f, -1.f },
+        { -1.f, -1.f, 1.f }, { -1.f, -1.f, -1.f }, { 1.f, -1.f, 1.f },
+
+        // +y
+        { 1.f, 1.f, -1.f }, { 1.f, 1.f, 1.f },{ -1.f, 1.f, -1.f },
+        { -1.f, 1.f, 1.f }, { -1.f, 1.f, -1.f }, { 1.f, 1.f, 1.f },
     };
 
     static const vec2 tex_coords[] = {
@@ -60,17 +56,8 @@ void chunk_generate_mesh(Chunk* chunk)
         { 0.f, 1.f }, // top left
     };
 
-    static const int neighbours_len = 6;
-    static const ivec3 neighbours[] = {
-        { -1, 0, 0 }, // -x
-        { 1, 0, 0 }, // +x
-        { 0, -1, 0 }, // -y
-        { 0, 1, 0 }, // +y
-        { 0, 0, -1 }, // -z
-        { 0, 0, 1 }, // +z
-    };
 
-    chunk->buffer_size = 36;
+    chunk->buffer_size = TRIANGLES_PER_BLOCK * 16;
     chunk->buffer_triangles = 0;
     chunk->buffer = malloc(TRIANGLE_BYTES * chunk->buffer_size);
 
@@ -84,10 +71,8 @@ void chunk_generate_mesh(Chunk* chunk)
                 Block block = chunk->blocks[x][y][z];
 
                 if(block.type == Air) continue;
-                if(chunk->buffer_triangles >= chunk->buffer_size)
+                if(chunk->buffer_triangles >= chunk->buffer_size - TRIANGLES_PER_BLOCK)
                 {
-                    //break;
-                    printf("allocating: %i\n", chunk->buffer_size * 2);
                     chunk->buffer_size *= 2;
                     chunk->buffer = realloc(chunk->buffer, TRIANGLE_BYTES * chunk->buffer_size);
                 }
@@ -99,26 +84,13 @@ void chunk_generate_mesh(Chunk* chunk)
                     int nx = x + neighbours[i][0];
                     int ny = y + neighbours[i][1];
                     int nz = z + neighbours[i][2];
-                    if(y == 0) {
-                        //printf("[nx, ny, nz]: { %i, %i, %i }\n", nx, ny, nz);
-                    }
 
-                    if(nx > 0 && nx < CHUNK_SIZE
-                        && ny > 0 && ny < CHUNK_SIZE
-                        && nz > 0 && nz < CHUNK_SIZE) {
-                        if(y == 0) {
-                            printf("current: %i | neighbour: %i | step: { %i, %i, %i }\n", 
-                                   chunk->blocks[x][y][z].type, 
-                                   chunk->blocks[nx][ny][nz].type,
-                                   neighbours[i][0],
-                                   neighbours[i][1],
-                                   neighbours[i][2]
-                                   );
-                        }
-
+                    if(nx >= 0 && nx < CHUNK_SIZE && 
+                        ny >= 0 && ny < CHUNK_SIZE && 
+                        nz >= 0 && nz < CHUNK_SIZE) 
+                    {
                         if(chunk->blocks[nx][ny][nz].type != Air) {
-                            printf("Skipping block\n");
-                            //continue;
+                            continue;
                         }
                     }
 
@@ -134,37 +106,18 @@ void chunk_generate_mesh(Chunk* chunk)
                         *(buffer++) = tex_coords[j % 6][1];
 
                         // texture index
-                        *(buffer++) = 0.f;
+                        *(buffer++) = block_get_texture_from_block_face(block.type, (FaceDirection)i);
 
                         chunk->buffer_triangles++;
                     }
                 }
-                
-                // TODO: Optimize by only copying the block face that is exposed to air
-                // copy vertex data into the buffer
-                /*
-                for(int i = 0; i < 36; i++)
-                {
-                    // vertex positions
-                    *(buffer++) = vertices[i][0] / 2 + x;
-                    *(buffer++) = vertices[i][1] / 2 + y;
-                    *(buffer++) = vertices[i][2] / 2 + z;
-
-                    // texture coordinates
-                    *(buffer++) = tex_coords[i % 6][0];
-                    *(buffer++) = tex_coords[i % 6][1];
-
-                    // texture index
-                    *(buffer++) = 0.f;
-
-                    chunk->buffer_triangles++;
-                }*/
 			}
 		}
 	}
 
     for(int i = 0; i < 36; i++)
     {
+        break;
         printf("{ %f, %f, %f }, { %f, %f, %f }\n",
                chunk->buffer[i * TRIANGLE_SIZE],
                chunk->buffer[i * TRIANGLE_SIZE + 1],
