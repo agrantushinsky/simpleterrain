@@ -1,8 +1,5 @@
 #include "chunk.h"
-#include "block.h"
-#include "shared.h"
-#include <GL/glext.h>
-#include <stdlib.h>
+#include "world.h"
 
 void chunk_generate(Chunk* chunk)
 {
@@ -18,7 +15,7 @@ void chunk_generate(Chunk* chunk)
 	}
 }
 
-void chunk_generate_mesh(Chunk* chunk)
+void chunk_generate_mesh(Chunk* chunk, ivec3 chunk_pos, void* world)
 {
     static const vec3 vertices[] = {
         // -x
@@ -80,15 +77,48 @@ void chunk_generate_mesh(Chunk* chunk)
 
                 for(int i = 0; i < neighbours_len; i++)
                 {
-                    int nx = x + neighbours[i][0];
-                    int ny = y + neighbours[i][1];
-                    int nz = z + neighbours[i][2];
+                    int dx = neighbours[i][0];
+                    int dy = neighbours[i][1];
+                    int dz = neighbours[i][2];
+                    int nx = x + dx;
+                    int ny = y + dy;
+                    int nz = z + dz;
 
                     if(nx >= 0 && nx < CHUNK_SIZE && 
                         ny >= 0 && ny < CHUNK_SIZE && 
                         nz >= 0 && nz < CHUNK_SIZE) 
                     {
                         if(chunk->blocks[nx][ny][nz].type != Air) {
+                            continue;
+                        }
+                    }
+                    else 
+                    {
+                        nx = nx < 0 ? CHUNK_SIZE - 1 : nx % CHUNK_SIZE;
+                        ny = ny < 0 ? CHUNK_SIZE - 1 : ny % CHUNK_SIZE;
+                        nz = nz < 0 ? CHUNK_SIZE - 1 : nz % CHUNK_SIZE;
+
+                        Chunk* neighbouring_chunk = world_get_chunk(
+                            world,
+                            (i16x3) {
+                                chunk_pos[0] + dx,
+                                chunk_pos[1] + dy,
+                                chunk_pos[2] + dz
+                            }
+                        );
+
+                        printf("[0x%p] { %i, %i, %i }, from { %i, %i, %i }, block: { %i, %i, %i } type: %i\n",
+                               neighbouring_chunk,
+                               chunk_pos[0] + dx,
+                               chunk_pos[1] + dy,
+                               chunk_pos[2] + dz,
+                               chunk_pos[0],
+                               chunk_pos[1],
+                               chunk_pos[2],
+                               dx, dy, dz,
+                               /*neighbouring_chunk->blocks[nx][ny][nz].type*/ 0);
+
+                        if(neighbouring_chunk && neighbouring_chunk->blocks[nx][ny][nz].type != Air) {
                             continue;
                         }
                     }

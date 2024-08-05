@@ -11,7 +11,6 @@
 #define TRIANGLES_PER_BLOCK 36
 
 struct {
-	ivec3 position;
 	Block blocks[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
 
     float* buffer;
@@ -21,7 +20,7 @@ struct {
 
 void chunk_generate(Chunk* chunk);
 
-void chunk_generate_mesh(Chunk* chunk);
+void chunk_generate_mesh(Chunk* chunk, ivec3 chunk_pos, void* world);
 
 void chunk_render(Chunk* chunk);
 

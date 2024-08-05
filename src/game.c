@@ -18,7 +18,7 @@ void APIENTRY debug_callback(GLenum source, GLenum type, GLenum id, GLenum sever
 // TODO: Move this again.
 void handle_input() 
 {
-    const static float speed = 0.0005f;
+    const static float speed = 0.005f;
     float yaw = game->camera.yaw;
     if (held_keys[GLFW_KEY_W]) {
         game->camera.position[0] += speed * cosf(glm_rad(yaw));

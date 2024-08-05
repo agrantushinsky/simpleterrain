@@ -2,13 +2,30 @@
 #include "chunk.h"
 #include "shader.h"
 #include "game.h"
-#include "texture.h"
+#include "texture.h"      
+
+#define STB_DS_IMPLEMENTATION
+#include "stb/stb_ds.h"
+
+int64_t i16x3_to_i64(i16x3 in)
+{
+    int64_t r = 0;
+    r |= (int64_t)(u_int16_t)in[0] << 32;
+    r |= (int64_t)(u_int16_t)in[1] << 16;
+    r |= (int64_t)(u_int16_t)in[2] << 0;
+    return r;
+}
+
+void i64_to_i16x3(int64_t in, i16x3 out)
+{
+    out[0] = (int16_t)(in >> 32);
+    out[1] = (int16_t)(in >> 16);
+    out[2] = (int16_t)(in);
+}
 
 void world_init(World* world) 
 {
-    world->chunks_max = 16;
-    world->loaded_chunks = 0;
-    world->chunks = calloc(world->chunks_max, sizeof(Chunk));
+    world->chunks = 0;
 
     world_generate_chunks(world);
 
@@ -22,7 +39,7 @@ void world_init(World* world)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array.texture);
 
-    glUniform1i(glGetUniformLocation(texture_array.texture, "sTexture"), 0);   
+    glUniform1i(glGetUniformLocation(texture_array.texture, "sTexture"), 0);
 }
 
 void world_update(World* world)
@@ -33,17 +50,20 @@ void world_update(World* world)
 void world_render(World* world)
 {
     // TODO: refactor "shader_programs"
-    for(int i = 0; i < world->loaded_chunks; i++) 
+    for(int i = 0; i < hmlen(world->chunks); i++) 
     {
-        Chunk* chunk = &world->chunks[i];
+        Chunk* chunk = world->chunks[i].value;
+        i16x3 pos;
+        i64_to_i16x3(world->chunks[i].key, pos);
+
         GLuint matrix_location = glGetUniformLocation(shader_programs[0], "matrix");
         assert(matrix_location != 0xFFFFFFFF);
 
         mat4 translation = GLM_MAT4_IDENTITY_INIT;
         glm_translate(translation, (vec3){
-            chunk->position[0] * CHUNK_SIZE,
-            chunk->position[1] * CHUNK_SIZE,
-            chunk->position[2] * CHUNK_SIZE,
+            pos[0] * CHUNK_SIZE,
+            pos[1] * CHUNK_SIZE,
+            pos[2] * CHUNK_SIZE,
         });
 
         mat4 final_matrix;
@@ -59,18 +79,35 @@ void world_render(World* world)
 void world_generate_chunks(World* world)
 {
     // for now just generate a "flat" world
-    int max = world->chunks_max;
-    int lmax = (int)sqrt(world->chunks_max);
+    int lmax = 4;
     for(int x = 0; x < lmax; x++)
     {
         for(int z = 0; z < lmax; z++)
         {
-            printf("generated chunk at { %i, %i }\n", x, z);
-            glm_ivec3_copy((ivec3){x, 0.f, z}, world->chunks[world->loaded_chunks].position);
-            chunk_generate(&world->chunks[world->loaded_chunks]);
-            chunk_generate_mesh(&world->chunks[world->loaded_chunks]);
-            world->loaded_chunks++;
+            Chunk* chunk = calloc(1, sizeof(Chunk));
+            ChunkHash hchunk = {
+                i16x3_to_i64((i16x3){x, 0, z}),
+                chunk
+            };
+
+            chunk_generate(chunk);
+
+            hmputs(world->chunks, hchunk);
         }
     }
+
+    for(int i = 0; i < hmlen(world->chunks); i++)
+    {
+        ChunkHash ch = world->chunks[i];
+        i16x3 pos;
+        i64_to_i16x3(ch.key, pos);
+        // It's best not to ask why here.
+        chunk_generate_mesh(ch.value, (ivec3){ pos[0], pos[1], pos[2] }, world);
+    }
+}
+
+Chunk* world_get_chunk(World* world, i16x3 chunk_position)
+{
+    return hmget(world->chunks, i16x3_to_i64(chunk_position));
 }
 
