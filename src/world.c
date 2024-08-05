@@ -2,7 +2,9 @@
 #include "chunk.h"
 #include "shader.h"
 #include "game.h"
-#include "texture.h"      
+#include "texture.h"
+#include <time.h>
+#include "worldgen.h"
 
 #define STB_DS_IMPLEMENTATION
 #include "stb/stb_ds.h"
@@ -26,6 +28,7 @@ void i64_to_i16x3(int64_t in, i16x3 out)
 void world_init(World* world) 
 {
     world->chunks = 0;
+    world->seed = (int)time(NULL);
 
     world_generate_chunks(world);
 
@@ -78,21 +81,12 @@ void world_render(World* world)
 
 void world_generate_chunks(World* world)
 {
-    // for now just generate a "flat" world
-    int lmax = 4;
+    int lmax = 16;
     for(int x = 0; x < lmax; x++)
     {
         for(int z = 0; z < lmax; z++)
         {
-            Chunk* chunk = calloc(1, sizeof(Chunk));
-            ChunkHash hchunk = {
-                i16x3_to_i64((i16x3){x, 0, z}),
-                chunk
-            };
-
-            chunk_generate(chunk);
-
-            hmputs(world->chunks, hchunk);
+            worldgen_generate_chunk_vertical(world, (ivec2){x, z});
         }
     }
 
@@ -109,5 +103,17 @@ void world_generate_chunks(World* world)
 Chunk* world_get_chunk(World* world, i16x3 chunk_position)
 {
     return hmget(world->chunks, i16x3_to_i64(chunk_position));
+}
+
+Chunk* world_allocate_chunk(World* world, i16x3 chunk_position)
+{
+    Chunk* chunk = calloc(1, sizeof(Chunk));
+    ChunkHash hchunk = {
+        i16x3_to_i64(chunk_position),
+        chunk
+    };
+    hmputs(world->chunks, hchunk);
+
+    return chunk;
 }
 

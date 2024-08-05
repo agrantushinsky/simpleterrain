@@ -18,8 +18,6 @@ struct {
     uint buffer_triangles;
 } typedef Chunk;
 
-void chunk_generate(Chunk* chunk);
-
 void chunk_generate_mesh(Chunk* chunk, ivec3 chunk_pos, void* world);
 
 void chunk_render(Chunk* chunk);

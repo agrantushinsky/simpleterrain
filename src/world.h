@@ -18,6 +18,7 @@ struct {
 
 struct {
 	ChunkHash* chunks;
+    int seed;
 } typedef World;
 
 void world_init(World* world);
@@ -29,5 +30,7 @@ void world_render(World* world);
 void world_generate_chunks(World* world);
 
 Chunk* world_get_chunk(World* world, i16x3 chunk_position);
+
+Chunk* world_allocate_chunk(World* world, i16x3 chunk_position);
 
 #endif

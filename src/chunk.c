@@ -1,20 +1,6 @@
 #include "chunk.h"
 #include "world.h"
 
-void chunk_generate(Chunk* chunk)
-{
-	for (int x = 0; x < CHUNK_SIZE; x++)
-	{
-		for (int y = 0; y < CHUNK_SIZE; y++)
-		{
-			for (int z = 0; z < CHUNK_SIZE; z++)
-			{
-                chunk->blocks[x][y][z].type = Grass;
-			}
-		}
-	}
-}
-
 void chunk_generate_mesh(Chunk* chunk, ivec3 chunk_pos, void* world)
 {
     static const vec3 vertices[] = {
@@ -51,7 +37,6 @@ void chunk_generate_mesh(Chunk* chunk, ivec3 chunk_pos, void* world)
         { 1.f, 0.f }, // bottom right
         { 0.f, 1.f }, // top left
     };
-
 
     chunk->buffer_size = TRIANGLES_PER_BLOCK * 16;
     chunk->buffer_triangles = 0;
@@ -107,17 +92,6 @@ void chunk_generate_mesh(Chunk* chunk, ivec3 chunk_pos, void* world)
                             }
                         );
 
-                        printf("[0x%p] { %i, %i, %i }, from { %i, %i, %i }, block: { %i, %i, %i } type: %i\n",
-                               neighbouring_chunk,
-                               chunk_pos[0] + dx,
-                               chunk_pos[1] + dy,
-                               chunk_pos[2] + dz,
-                               chunk_pos[0],
-                               chunk_pos[1],
-                               chunk_pos[2],
-                               dx, dy, dz,
-                               /*neighbouring_chunk->blocks[nx][ny][nz].type*/ 0);
-
                         if(neighbouring_chunk && neighbouring_chunk->blocks[nx][ny][nz].type != Air) {
                             continue;
                         }
@@ -143,18 +117,6 @@ void chunk_generate_mesh(Chunk* chunk, ivec3 chunk_pos, void* world)
 			}
 		}
 	}
-
-    for(int i = 0; i < 36; i++)
-    {
-        break;
-        printf("{ %f, %f, %f }, { %f, %f, %f }\n",
-               chunk->buffer[i * TRIANGLE_SIZE],
-               chunk->buffer[i * TRIANGLE_SIZE + 1],
-               chunk->buffer[i * TRIANGLE_SIZE + 2],
-               chunk->buffer[i * TRIANGLE_SIZE + 3],
-               chunk->buffer[i * TRIANGLE_SIZE + 4],
-               chunk->buffer[i * TRIANGLE_SIZE + 5]);
-    }
 }
 
 void chunk_render(Chunk* chunk)

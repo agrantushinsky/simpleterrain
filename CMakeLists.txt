@@ -6,6 +6,7 @@ project(
 
 # Source files
 file(GLOB_RECURSE SOURCE_FILES 
+    ${CMAKE_SOURCE_DIR}/src/worldgen.c
     ${CMAKE_SOURCE_DIR}/src/texture.c
     ${CMAKE_SOURCE_DIR}/src/world.c
     ${CMAKE_SOURCE_DIR}/src/chunk.c
@@ -19,6 +20,7 @@ file(GLOB_RECURSE SOURCE_FILES
 	
 # Header files
 file(GLOB_RECURSE HEADER_FILES 
+    ${CMAKE_SOURCE_DIR}/src/worldgen.h
     ${CMAKE_SOURCE_DIR}/src/texture.h
     ${CMAKE_SOURCE_DIR}/src/world.h
     ${CMAKE_SOURCE_DIR}/src/chunk.h
@@ -31,6 +33,7 @@ file(GLOB_RECURSE HEADER_FILES
 
     ${CMAKE_SOURCE_DIR}/lib/stb/stb_image.h
     ${CMAKE_SOURCE_DIR}/lib/stb/stb_ds.h
+    ${CMAKE_SOURCE_DIR}/lib/stb/stb_perlin.h
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY 
