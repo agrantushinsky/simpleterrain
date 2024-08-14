@@ -33,11 +33,13 @@ void world_init(World* world)
     world_generate_chunks(world);
 
     TextureArray texture_array;
-    texture_array_create(&texture_array, GL_RGBA, GL_RGB, 16, 4);
+    texture_array_create(&texture_array, GL_RGBA, GL_RGB, 16, 6);
     texture_array_add(&texture_array, "../res/images/stone.png");
     texture_array_add(&texture_array, "../res/images/dirt.png");
     texture_array_add(&texture_array, "../res/images/grass_side.png");
     texture_array_add(&texture_array, "../res/images/grass.png");
+    texture_array_add(&texture_array, "../res/images/sand.png");
+    texture_array_add(&texture_array, "../res/images/water.png");
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array.texture);

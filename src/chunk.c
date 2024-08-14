@@ -43,12 +43,12 @@ void chunk_generate_mesh(Chunk* chunk, ivec3 chunk_pos, void* world)
     chunk->buffer = malloc(TRIANGLE_BYTES * chunk->buffer_size);
 
     // This might be a little slow :) 
-	for (int x = 0; x < CHUNK_SIZE; x++)
-	{
-		for (int y = 0; y < CHUNK_SIZE; y++)
-		{
-			for (int z = 0; z < CHUNK_SIZE; z++)
-			{
+    for (int x = 0; x < CHUNK_SIZE; x++)
+    {
+        for (int y = 0; y < CHUNK_SIZE; y++)
+        {
+            for (int z = 0; z < CHUNK_SIZE; z++)
+            {
                 Block block = chunk->blocks[x][y][z];
 
                 if(block.type == Air) continue;
@@ -114,9 +114,9 @@ void chunk_generate_mesh(Chunk* chunk, ivec3 chunk_pos, void* world)
                         chunk->buffer_triangles++;
                     }
                 }
-			}
-		}
-	}
+            }
+        }
+    }
 }
 
 void chunk_render(Chunk* chunk)
@@ -129,6 +129,8 @@ void chunk_render(Chunk* chunk)
     // vertex positions
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, TRIANGLE_BYTES, 0);
     glEnableVertexAttribArray(0);
+
+
 
     // texture coordinates (offset by vertex positions)
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, TRIANGLE_BYTES, (void*)sizeof(vec3));

@@ -9,7 +9,9 @@ enum : uint8_t {
     Air,
     Stone,
     Dirt,
-    Grass
+    Grass,
+    Sand,
+    Water
 } typedef BlockType;
 
 enum : uint8_t {
@@ -26,7 +28,9 @@ enum : int8_t {
     FaceStone,
     FaceDirt,
     FaceGrassSide,
-    FaceGrass
+    FaceGrass,
+    FaceSand,
+    FaceWater
 } typedef FaceTextureIndex;
 
 static const int neighbours_len = 6;

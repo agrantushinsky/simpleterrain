@@ -6,53 +6,79 @@
 #define STB_PERLIN_IMPLEMENTATION
 #include "stb/stb_perlin.h"
 
+/*
+ * Steps:
+ * 1. Determine which blocks are solid (e.g.: stone or air)
+ *  - Combine different noise functions, each with their own amplitudes and octaves. (e.g.: continentalness, erosion, and valleys)
+ *  and:
+ *  - By using 3d noise:
+ *  - f(x, y, z) => density (> 0 solid, < 0 air)
+ *  - use a squashing factor, and a height offset
+ *
+ * 2. Fill in ocean/lakes/rivers (i.e.: below a certain y-level (?))
+ * 3. Apply the surface layer
+ * 4. Decorations
+*/
+
 void worldgen_generate_chunk_vertical(World* world, ivec2 chunk_pos)
 {
-    float height_map[CHUNK_SIZE][CHUNK_SIZE];
+    const int WORLD_HEIGHT = CHUNK_SIZE * 4;
+    const int SEA_HEIGHT = 12;
+
+    int terrain_height[CHUNK_SIZE][CHUNK_SIZE];
     for(int i = 0; i < CHUNK_SIZE; i++)
     {
         for(int j = 0; j < CHUNK_SIZE; j++)
         {
-            float rx = (float)i + chunk_pos[0] * 16,
+            float rx = (float)i + chunk_pos[0] * CHUNK_SIZE,
                 ry = 0,
-                rz = (float)j + chunk_pos[1] * 16;
+                rz = (float)j + chunk_pos[1] * CHUNK_SIZE;
 
-            float noise = stb_perlin_noise3_seed(rx / 36, ry, rz / 36, 0, 0, 0, world->seed);
-            noise += 1;
-            noise /= 2;
-            noise *= powf(noise, 1.25);
-            height_map[i][j] = noise;
+            // I don't even know.
+            float continentalness = stb_perlin_fbm_noise3(rx, ry, rz, 0.05f, 0.4f, 4);
+            float erosion = stb_perlin_fbm_noise3(rx, ry, rz, 0.02f, 0.7f, 2);
+            float valleys = stb_perlin_fbm_noise3(rx / 16, ry / 16, rz / 16, 0.5f, 0.5f, 2);
+
+            float noise = continentalness + (erosion * valleys * 4);
+
+            terrain_height[i][j] = (float)WORLD_HEIGHT / 2 + (noise * WORLD_HEIGHT / 2);
         }
     }
 
-    const int CHUNK_HEIGHT = 8;
-
-    for(int cy = 0; cy < CHUNK_HEIGHT; cy++)
+    for(int cy = 0; cy < WORLD_HEIGHT / CHUNK_SIZE; cy++)
     {
         Chunk* chunk = world_allocate_chunk(world, (i16x3){ chunk_pos[0], cy, chunk_pos[1] });
 
-        for (int x = 0; x < CHUNK_SIZE; x++)
+        for(int x = 0; x < CHUNK_SIZE; x++)
         {
-            for (int z = 0; z < CHUNK_SIZE; z++)
+            for(int z = 0; z < CHUNK_SIZE; z++)
             {
-                float height = height_map[x][z];
-                int top = height * CHUNK_SIZE * CHUNK_HEIGHT;
-
-                for (int y = 0; y < CHUNK_SIZE; y++)
+                for(int ly = 0; ly < CHUNK_SIZE; ly++)
                 {
-                    int ry = y + cy * CHUNK_SIZE;
-
-                    if(ry == top) {
-                        chunk->blocks[x][y][z].type = Grass;
-                    } else if(ry < top) {
-                        if(ry > top - 2) {
-                            chunk->blocks[x][y][z].type = Dirt;
-                        } else {
-                            chunk->blocks[x][y][z].type = Stone;
-                        }
+                    int y = ly + cy * CHUNK_SIZE;
+                    
+                    BlockType type = Air;
+                    int height = terrain_height[x][z];
+                    if(y <= SEA_HEIGHT && y > height) {
+                        type = Water;
                     }
+                    else if(y <= SEA_HEIGHT && y == height) {
+                        type = Sand;
+                    }
+                    else if(y == height) {
+                        type = Grass;
+                    }
+                    else if(y > height - 3 && y < height) {
+                        type = Dirt;
+                    }
+                    else if(y < height){
+                        type = Stone;
+                    }
+
+                    chunk->blocks[x][ly][z].type = type;
                 }
             }
         }
-	}
+    }
 }
+

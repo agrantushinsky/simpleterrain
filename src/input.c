@@ -16,6 +16,8 @@ void keyboard_callback(GLFWwindow* window, int key, int scancode, int action, in
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+    const float sensitivity = 0.05f;
+
     static double last_xpos = 0.0;
     static double last_ypos = 0.0;
 
@@ -25,13 +27,13 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     last_xpos = xpos;
     last_ypos = ypos;
 
-    game->camera.yaw += dx * 0.05f;
+    game->camera.yaw += dx * sensitivity;
     if(game->camera.yaw > 360 || game->camera.yaw < -360) 
     {
         game->camera.yaw = 0;
     }
 
-    game->camera.pitch = glm_min(glm_max(game->camera.pitch - dy * 0.05f, -89.99f), 89.99f);
+    game->camera.pitch = glm_min(glm_max(game->camera.pitch - dy * sensitivity, -89.99f), 89.99f);
 
     camera_update_view(&game->camera);
 }

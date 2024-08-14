@@ -18,6 +18,10 @@ FaceTextureIndex block_get_texture_from_block_face(BlockType type, FaceDirection
             } else if(face_direction == PY) {
                 return FaceGrass;
             }
+        case Sand:
+            return FaceSand;
+        case Water:
+            return FaceWater;
     }
 
     return FaceInvalid;
