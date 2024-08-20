@@ -16,6 +16,7 @@ struct {
     float* buffer;
     uint buffer_size;
     uint buffer_triangles;
+    GLuint gl_buffer;
 } typedef Chunk;
 
 void chunk_generate_mesh(Chunk* chunk, ivec3 chunk_pos, void* world);

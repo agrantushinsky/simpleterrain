@@ -1,4 +1,5 @@
 #include "chunk.h"
+#include "shared.h"
 #include "world.h"
 
 void chunk_generate_mesh(Chunk* chunk, ivec3 chunk_pos, void* world)
@@ -40,7 +41,12 @@ void chunk_generate_mesh(Chunk* chunk, ivec3 chunk_pos, void* world)
 
     chunk->buffer_size = TRIANGLES_PER_BLOCK * 16;
     chunk->buffer_triangles = 0;
-    chunk->buffer = malloc(TRIANGLE_BYTES * chunk->buffer_size);
+    if(!chunk->buffer) {
+        chunk->buffer = malloc(TRIANGLE_BYTES * chunk->buffer_size);
+    } else {
+        glDeleteBuffers(1, &chunk->gl_buffer);
+    }
+    chunk->gl_buffer = 0;
 
     // This might be a little slow :) 
     for (int x = 0; x < CHUNK_SIZE; x++)
@@ -117,20 +123,19 @@ void chunk_generate_mesh(Chunk* chunk, ivec3 chunk_pos, void* world)
             }
         }
     }
+
+    glGenBuffers(1, &chunk->gl_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, chunk->gl_buffer);
+    glBufferData(GL_ARRAY_BUFFER, chunk->buffer_triangles * TRIANGLE_BYTES, chunk->buffer, GL_STATIC_DRAW);
 }
 
 void chunk_render(Chunk* chunk)
 {
-    GLuint vertex_buffer;
-    glGenBuffers(1, &vertex_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, chunk->buffer_triangles * TRIANGLE_BYTES, chunk->buffer, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, chunk->gl_buffer);
 
     // vertex positions
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, TRIANGLE_BYTES, 0);
     glEnableVertexAttribArray(0);
-
-
 
     // texture coordinates (offset by vertex positions)
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, TRIANGLE_BYTES, (void*)sizeof(vec3));
@@ -140,7 +145,5 @@ void chunk_render(Chunk* chunk)
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
-
-    glDeleteBuffers(1, &vertex_buffer);
 }
 

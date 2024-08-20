@@ -21,6 +21,8 @@ int main(void)
         glfwPollEvents();
     }
 
+    game_destroy();
+
     glfwTerminate();
     return 0;
 }

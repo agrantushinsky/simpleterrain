@@ -47,6 +47,16 @@ void world_init(World* world)
     glUniform1i(glGetUniformLocation(texture_array.texture, "sTexture"), 0);
 }
 
+void world_destory(World* world)
+{
+    for(int i = 0; i < hmlen(world->chunks); i++) 
+    {
+        Chunk* chunk = world->chunks[i].value;
+        free(chunk);
+    }
+    free(world);
+}
+
 void world_update(World* world)
 {
     // Eventually the loading/unloading logic should go here.
@@ -117,5 +127,13 @@ Chunk* world_allocate_chunk(World* world, i16x3 chunk_position)
     hmputs(world->chunks, hchunk);
 
     return chunk;
+}
+
+void world_deallocate_chunk(World* world, i16x3 chunk_position)
+{
+    int64_t key = i16x3_to_i64(chunk_position);
+    Chunk* chunk = hmget(world->chunks, key);
+    free(chunk);
+    hmdel(world->chunks, key);
 }
 

@@ -19,6 +19,8 @@ extern struct Game* game;
 
 bool game_init();
 
+void game_destroy();
+
 void game_update();
 
 void game_render();

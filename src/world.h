@@ -23,6 +23,8 @@ struct {
 
 void world_init(World* world);
 
+void world_destory(World* world);
+
 void world_update(World* world);
 
 void world_render(World* world);
@@ -32,5 +34,7 @@ void world_generate_chunks(World* world);
 Chunk* world_get_chunk(World* world, i16x3 chunk_position);
 
 Chunk* world_allocate_chunk(World* world, i16x3 chunk_position);
+
+void world_deallocate_chunk(World* world, i16x3 chunk_position);
 
 #endif

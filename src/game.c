@@ -121,6 +121,12 @@ bool game_init()
     return true;
 }
 
+void game_destroy()
+{
+    glfwDestroyWindow(game->window);
+    free(game);
+}
+
 void game_update()
 {
     handle_input();
